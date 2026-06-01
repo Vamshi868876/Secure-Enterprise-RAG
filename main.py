@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import jwt
@@ -8,6 +9,15 @@ app = FastAPI(
     title="Secure Enterprise RAG API",
     description="FAANG-Level Role-Based Access Control RAG System",
     version="1.0.0"
+)
+
+# Enable CORS for the React Frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In production, restrict this to the frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # --- CONFIG ---

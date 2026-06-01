@@ -50,42 +50,52 @@ graph TD
 
 ## 🚀 Quick Start
 
-### 1. Local Python Setup
+### 1. Run the Full Stack with Docker (Recommended)
+You can launch the FastAPI Backend and the React Frontend simultaneously using Docker Compose.
 ```bash
 # Clone the repository
 git clone https://github.com/Vamshi868876/Secure-Enterprise-RAG.git
 cd Secure-Enterprise-RAG
 
-# Create virtual environment & install
+# Launch the entire architecture
+docker-compose up --build
+```
+* The API will run on `http://localhost:8000`
+* The React Chat UI will run on `http://localhost:5173`
+
+### 2. Local Python & Node.js Setup
+If you prefer running without Docker:
+```bash
+# Terminal 1: Run the Backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
-
-# Populate the Secure Vector Database
 python populate_db.py
-
-# Run the API server
 uvicorn main:app --reload
+
+# Terminal 2: Run the React Frontend
+cd frontend
+npm install
+npm run dev
 ```
 
-### 2. Docker Deployment
+## ☁️ AWS Cloud Deployment (Terraform)
+This repository includes production-ready **Infrastructure-as-Code** to deploy the architecture to AWS ECS (Elastic Container Service) on Fargate.
+
 ```bash
-docker build -t secure-rag-api .
-docker run -p 8000:8000 secure-rag-api
+cd terraform
+terraform init
+terraform plan
+terraform apply
 ```
+This automatically provisions the VPC, Subnets, Security Groups, Application Load Balancer, and the ECS Fargate Cluster.
 
 ## 🧪 Security Simulation (Hacker Test)
 
-To prove the security works, run the included `test_rag.py` simulation. 
-It attempts to steal the CEO's salary using two different JWT tokens.
+To prove the security works, open the React UI (`http://localhost:5173`) and test the two different JWT roles.
 
-```bash
-python test_rag.py
-```
-
-**Results:**
-1. ❌ **As Software Engineer:** The system blocks access to the HR documents. The AI is completely unaware of the salary.
-2. ✅ **As HR Manager:** The system verifies the role, allows access to the HR documents, and outputs the correct $850,000 salary.
+1. ❌ **Login as Software Engineer:** Attempt to ask "What is the CEO's salary?". The system mathematically blocks access to the HR documents at the Vector level. The AI is completely unaware of the salary.
+2. ✅ **Login as HR Manager:** Ask the exact same question. The system verifies the role, unlocks access to the HR documents, and securely outputs the correct $850,000 salary.
 
 ---
 *Built as a demonstration of Secure Enterprise AI Architecture.*
