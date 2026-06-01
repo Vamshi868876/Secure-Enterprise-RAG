@@ -17,21 +17,21 @@ This project solves this by wrapping the Vector Database in a secure JWT-authent
 
 ```mermaid
 graph TD
-    User([User / Employee]) -->|Query + JWT Token| API(FastAPI Security Gateway)
+    User(["User / Employee"]) -->|"Query + JWT Token"| API("FastAPI Security Gateway")
     
     subgraph "Secure RAG Architecture"
-        API -->|1. Validate JWT Role| Auth{RBAC Engine}
-        Auth -->|Invalid| 401[401 Unauthorized]
-        Auth -->|Valid Role (e.g. HR)| Embedder[Embedding Model]
+        API -->|"1. Validate JWT Role"| Auth{"RBAC Engine"}
+        Auth -->|"Invalid"| 401["401 Unauthorized"]
+        Auth -->|"Valid Role (e.g. HR)"| Embedder["Embedding Model"]
         
-        Embedder -->|Vector| VDB[(Vector Database)]
+        Embedder -->|"Vector"| VDB[("Vector Database")]
         
-        VDB -->|2. Hard Filter applied:| Filter["WHERE role = 'HR'"]
-        Filter --> Context[Retrieve Allowed Context]
+        VDB -->|"2. Hard Filter applied:"| Filter["WHERE role = 'HR'"]
+        Filter --> Context["Retrieve Allowed Context"]
     end
     
-    Context -->|3. Safe Context| LLM((LLM Generation))
-    LLM --> Answer[Secure Answer Generated]
+    Context -->|"3. Safe Context"| LLM(("LLM Generation"))
+    LLM --> Answer["Secure Answer Generated"]
     Answer --> User
 ```
 
