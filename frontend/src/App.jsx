@@ -3,7 +3,7 @@ import { Send, Shield, Lock, User, FileText, Database, LogOut } from 'lucide-rea
 import ReactMarkdown from 'react-markdown'
 import './index.css'
 
-const API_URL = 'http://127.0.0.1:8000'
+const API_URL = 'https://secure-enterprise-rag.onrender.com'
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('jwt_token'))
