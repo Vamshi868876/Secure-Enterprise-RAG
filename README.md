@@ -106,4 +106,9 @@ To prove the security works, open the React UI (`http://localhost:5173`) and tes
 2. ✅ **Login as HR Manager:** Ask the exact same question. The system verifies the role, unlocks access to the HR documents, and securely outputs the correct $850,000 salary with proper markdown formatting.
 
 ---
+
+## 👨‍💻 Author
+**Developed by:** Vamshi Batthula  
+**Contact:** [batthulavamshi740@gmail.com](mailto:batthulavamshi740@gmail.com)
+
 *Built as a demonstration of Secure Enterprise AI Architecture.*
