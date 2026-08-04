@@ -24,29 +24,30 @@ graph TD
         Auth -->|"Invalid"| 401["401 Unauthorized"]
         Auth -->|"Valid Role (e.g. HR)"| Embedder["Embedding Model"]
         
-        Embedder -->|"Vector"| VDB[("Vector Database")]
+        Embedder -->|"Vector"| VDB[("Chroma Vector Database")]
         
         VDB -->|"2. Hard Filter applied:"| Filter["WHERE role = 'HR'"]
         Filter --> Context["Retrieve Allowed Context"]
     end
     
     Context -->|"3. Safe Context"| LLM(("LLM Generation"))
-    LLM --> Answer["Secure Answer Generated"]
+    LLM --> Answer["Secure Markdown Answer"]
     Answer --> User
 ```
 
 ## 🚀 Features
-* **Zero-Trust Vector Retrieval:** Documents are tagged with security metadata upon ingestion. The API physically blocks unauthorized retrieval.
+* **Zero-Trust Vector Retrieval:** Documents are tagged with security metadata upon ingestion. The API physically blocks unauthorized retrieval using ChromaDB's `$or` filters.
 * **JWT Authentication:** Cryptographically signed tokens prove the user's role (`HR_Manager`, `Software_Engineer`, etc.).
-* **Dockerized:** Fully containerized microservice ready for AWS ECS, Google Cloud Run, or Kubernetes.
+* **Real-time Markdown Rendering:** The React frontend parses AI outputs using `react-markdown` for a premium, ChatGPT-like user experience.
+* **Dockerized:** Fully containerized microservice ready for HuggingFace Spaces, Render, or Google Cloud Run.
 * **FastAPI Backend:** High performance asynchronous Python API.
 
 ## 🛠️ Tech Stack
-* **Framework:** FastAPI, Uvicorn
+* **Framework:** FastAPI, Uvicorn, React, Vite
 * **Security:** PyJWT, hashlib
-* **AI/ML:** LangChain, HuggingFace SentenceTransformers
-* **Vector DB:** ChromaDB (Mocked for cross-platform compatibility)
-* **DevSecOps:** Docker
+* **AI/ML:** LangChain, HuggingFace SentenceTransformers (`all-MiniLM-L6-v2`)
+* **Vector DB:** ChromaDB
+* **DevSecOps:** Docker, Docker Compose
 
 ## 🚀 Quick Start
 
@@ -79,23 +80,30 @@ npm install
 npm run dev
 ```
 
-## ☁️ AWS Cloud Deployment (Terraform)
-This repository includes production-ready **Infrastructure-as-Code** to deploy the architecture to AWS ECS (Elastic Container Service) on Fargate.
+## ☁️ Free Deployment Guide (No AWS/Azure Required)
 
-```bash
-cd terraform
-terraform init
-terraform plan
-terraform apply
-```
-This automatically provisions the VPC, Subnets, Security Groups, Application Load Balancer, and the ECS Fargate Cluster.
+This repository is optimized for deployment on free platforms, making it an excellent AI/ML portfolio piece!
+
+### Deploy Backend to Render (Free Tier)
+1. Sign up at [Render.com](https://render.com/).
+2. Create a **New Web Service** and link this GitHub repository.
+3. Render will automatically detect the `Dockerfile` and build the Python API container.
+4. Copy the resulting backend URL.
+
+### Deploy Frontend to Render (Free Tier)
+1. In `frontend/src/App.jsx`, update the `API_URL` to point to your new Render backend URL.
+2. Go to Render and create a **New Static Site**.
+3. Point it to this repository, but set the **Root Directory** to `frontend`.
+4. Set the Build Command to `npm run build` and Publish directory to `dist`.
+
+*Alternatively, the backend can be deployed for free on **HuggingFace Spaces (Docker)** which provides 16GB of free RAM, perfect for ML models!*
 
 ## 🧪 Security Simulation (Hacker Test)
 
 To prove the security works, open the React UI (`http://localhost:5173`) and test the two different JWT roles.
 
 1. ❌ **Login as Software Engineer:** Attempt to ask "What is the CEO's salary?". The system mathematically blocks access to the HR documents at the Vector level. The AI is completely unaware of the salary.
-2. ✅ **Login as HR Manager:** Ask the exact same question. The system verifies the role, unlocks access to the HR documents, and securely outputs the correct $850,000 salary.
+2. ✅ **Login as HR Manager:** Ask the exact same question. The system verifies the role, unlocks access to the HR documents, and securely outputs the correct $850,000 salary with proper markdown formatting.
 
 ---
 *Built as a demonstration of Secure Enterprise AI Architecture.*
