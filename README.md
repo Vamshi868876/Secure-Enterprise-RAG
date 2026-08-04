@@ -6,6 +6,8 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.136-teal)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue)
 
+### 🔴 [Live Demo: Secure Enterprise RAG UI](https://secure-enterprise-rag-1.onrender.com)
+
 A production-grade **Retrieval-Augmented Generation (RAG)** API designed with **Zero-Trust Security** and **Role-Based Access Control (RBAC)**. This architecture prevents Large Language Models (LLMs) from leaking sensitive enterprise data (e.g., HR salaries, Engineering passwords) to unauthorized users by enforcing cryptographic hard-filters at the Vector Database level.
 
 ## 🌟 The Problem it Solves
