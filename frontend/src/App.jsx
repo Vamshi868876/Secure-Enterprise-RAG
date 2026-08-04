@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Shield, Lock, User, FileText, Database, LogOut } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 import './index.css'
 
 const API_URL = 'http://127.0.0.1:8000'
@@ -181,7 +182,9 @@ function ChatScreen({ token, role, onLogout }) {
               {msg.role === 'ai' ? <Database size={18} /> : <User size={18} />}
             </div>
             <div className="message-content">
-              <div dangerouslySetInnerHTML={{ __html: msg.content.replace(/\n/g, '<br/>') }} />
+              <ReactMarkdown className="markdown-body">
+                {msg.content}
+              </ReactMarkdown>
               
               {msg.sources && msg.sources.length > 0 && (
                 <div className="sources-box">

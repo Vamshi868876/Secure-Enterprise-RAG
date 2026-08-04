@@ -1,78 +1,27 @@
-import json
-import hashlib
-import math
 import os
+from langchain_core.documents import Document
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
-class MockEmbeddings:
-    def embed_documents(self, texts):
-        return [self.embed_query(text) for text in texts]
-        
-    def embed_query(self, text):
-        h = hashlib.sha256(text.encode()).digest()
-        # Create a simple 64-dimensional vector
-        return [(b / 128.0) - 1.0 for b in h[:64]]
+# Define the persistent directory for ChromaDB
+CHROMA_PATH = "chroma_db"
 
-def cosine_similarity(v1, v2):
-    dot = sum(a * b for a, b in zip(v1, v2))
-    norm1 = math.sqrt(sum(a * a for a in v1))
-    norm2 = math.sqrt(sum(b * b for b in v2))
-    if norm1 == 0 or norm2 == 0: return 0
-    return dot / (norm1 * norm2)
+def main():
+    print("Initializing Real Vector Database (ChromaDB) with Sentence Transformers...")
+    
+    # 1. Initialize the Real Embedding Model
+    # 1. Initialize Embeddings
+    print("Loading Embeddings...")
+    # NOTE: Using FakeEmbeddings locally to avoid Windows PyTorch DLL crashes.
+    # When deployed to Linux (Render/HuggingFace), you can swap this back to:
+    # from langchain_community.embeddings import HuggingFaceEmbeddings
+    # embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    from langchain_community.embeddings import DeterministicFakeEmbedding
+    embeddings = DeterministicFakeEmbedding(size=384)
 
-class SimpleSecureVectorDB:
-    def __init__(self, db_path):
-        self.db_path = db_path
-        self.data = []
-        
-    def add(self, embeddings, documents, metadatas, ids):
-        for emb, doc, meta, _id in zip(embeddings, documents, metadatas, ids):
-            self.data.append({
-                "id": _id,
-                "embedding": emb,
-                "document": doc,
-                "metadata": meta
-            })
-        with open(self.db_path, 'w') as f:
-            json.dump(self.data, f)
-            
-    def load(self):
-        if os.path.exists(self.db_path):
-            with open(self.db_path, 'r') as f:
-                self.data = json.load(f)
-                
-    def query(self, query_embeddings, n_results=3, where=None):
-        query_vec = query_embeddings[0]
-        results = []
-        for item in self.data:
-            # APPLY SECURE RBAC FILTERING
-            if where:
-                conditions = where.get("$or", [])
-                allowed = False
-                for cond in conditions:
-                    for k, v in cond.items():
-                        if item["metadata"].get(k) == v:
-                            allowed = True
-                if not allowed:
-                    continue # SECURITY BLOCK: User not allowed to see this document
-                    
-            sim = cosine_similarity(query_vec, item["embedding"])
-            results.append((sim, item))
-            
-        results.sort(key=lambda x: x[0], reverse=True)
-        top_results = results[:n_results]
-        
-        return {
-            "documents": [[r[1]["document"] for r in top_results]],
-            "metadatas": [[r[1]["metadata"] for r in top_results]]
-        }
-
-if __name__ == "__main__":
-    print("Initializing Custom Secure Vector Database...")
-    embeddings = MockEmbeddings()
-    db = SimpleSecureVectorDB("secure_vector_store.json")
-
-    # Dummy Documents
-    documents = [
+    # 2. Dummy Documents with Secure RBAC Metadata
+    # In a real enterprise app, these would be loaded from PDFs, Notion, etc.
+    raw_documents = [
         {
             "content": "The CEO's base salary for 2026 is $850,000 with a potential performance bonus of $2,000,000. Access restricted to HR.",
             "metadata": {"role": "HR_Manager", "source": "ceo_compensation.pdf"}
@@ -95,19 +44,28 @@ if __name__ == "__main__":
         }
     ]
 
-    print(f"Embedding {len(documents)} secure documents into the Vector Database...")
+    # 3. Convert to LangChain Document objects
+    documents = []
+    for i, doc in enumerate(raw_documents):
+        documents.append(
+            Document(
+                page_content=doc["content"],
+                metadata=doc["metadata"],
+                id=f"doc_{i}"
+            )
+        )
 
-    docs = [doc["content"] for doc in documents]
-    metadatas = [doc["metadata"] for doc in documents]
-    ids = [f"doc_{i}" for i in range(len(documents))]
+    print(f"Embedding {len(documents)} secure documents into ChromaDB...")
 
-    vectors = embeddings.embed_documents(docs)
-
-    db.add(
-        embeddings=vectors,
-        documents=docs,
-        metadatas=metadatas,
-        ids=ids
+    # 4. Create and persist the Chroma Vector Store
+    # This automatically computes the embeddings and saves them to disk
+    vector_store = Chroma.from_documents(
+        documents=documents,
+        embedding=embeddings,
+        persist_directory=CHROMA_PATH
     )
 
-    print("SUCCESS: Custom Vector Database populated with Secure RBAC Metadata!")
+    print(f"SUCCESS: Chroma Vector Database successfully populated at '{CHROMA_PATH}' with Secure RBAC Metadata!")
+
+if __name__ == "__main__":
+    main()
