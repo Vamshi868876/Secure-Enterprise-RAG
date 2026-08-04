@@ -1,5 +1,6 @@
 # Secure Enterprise RAG Architecture 🛡️
 
+[![Deployment Status](https://img.shields.io/badge/Status-🟢_Live-brightgreen?style=for-the-badge)](https://secure-enterprise-rag-1.onrender.com)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Security](https://img.shields.io/badge/security-RBAC%20Enabled-blue)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
